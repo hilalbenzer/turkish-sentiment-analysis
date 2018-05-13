@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re, os
-#import nltk
+import nltk
 from nltk.tokenize import word_tokenize
 import string
 from TurkishStemmer import TurkishStemmer
@@ -39,7 +39,7 @@ def remove_words(word_list, delete_list):
 def remove_with_regex(word_list):
 	new_word_list = []
 	for word in word_list:
-		check = re.findall(r'(?:pic.twitter|^@|\d+)', word)
+		check = re.findall(r'(?:pic.twitter|^@|\d+|^rt$)', word)
 		if not check:
 			new_word_list.append(word)
 	return new_word_list
@@ -120,21 +120,32 @@ def create_train(text_raw, tag):
 start = time.time()
 
 direct = "./Train/"
+
+print("Reading files...")
 positive_raw = read_file(os.path.join(direct, "positive-train"))
 negative_raw = read_file(os.path.join(direct, "negative-train"))
 notr_raw = read_file(os.path.join(direct, "notr-train"))
 
+print("Preprocessing...")
 train = []
-
 create_train(positive_raw, "1")
 create_train(negative_raw, "-1")
 create_train(notr_raw, "0")
 
-#all_words = set(word for passage in train for word in word_tokenize(passage[0]))
-#t = [({word: (word in word_tokenize(x[0])) for word in all_words}, x[1]) for x in train]
-#write_file("t", t)
+print("This thing...")
+all_words = set(word for passage in train for word in word_tokenize(passage[0]))
 
 
+#training_set = nltk.classify.apply_features(extract_features, train)
+
+#classifier = nltk.NaiveBayesClassifier.train(training_set)
+
+test_sentence = ["SKANDAL !! Boğaziçi ?nde PKK sloganları ve PKK'nın ne işi var? pic.twitter.com/aNE1FKR5BB", "Boğaziçi üni kapatılsın. Bence gereksiz Pkk yuvası", "Hayaller tamda istanbul bogaziçi universitesi", "Boğaziçi Üniversitesi - Tarih Bölümü kalpben <3", "Bugün Bogaziçi Üniversitesi Mithat Alam Film Merkezi'nde Hayko Cepkin'le söylesecegiz: pic.twitter.com/emNtHqGMQD 18.00 itibariyle baslariz.", "Boğaziçi Üniversitesi yds 2014 - Bildirimiz sunuluyor pic.twitter.com/W1i4wQrW3K"]
+
+for test in test_sentence:
+	print(test)
+	#print(classifier.classify(extract_features(test.split())))
+	print("\n")
 
 end = time.time()
 print(end - start)
