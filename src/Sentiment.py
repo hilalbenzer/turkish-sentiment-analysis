@@ -6,6 +6,7 @@ import re, os
 from nltk.tokenize import word_tokenize
 import string
 from TurkishStemmer import TurkishStemmer
+import time
 
 def read_file(filename):
 	f = open(filename, "r") 
@@ -18,6 +19,9 @@ def write_file(filename, output):
 	file = open(full_filename, 'a')
 	file.write(str(output))
 	file.close()
+
+stemmer = TurkishStemmer()
+stopwords = read_file("stopwords.txt").split("\n")
 
 def delete_characters(text, char_list):
 	for char in char_list:
@@ -61,27 +65,41 @@ def remove_punct_neg(word):
 def remove_repeating_char(word):
     new_word = ""
     prev_char = ''
-    for char in word.decode('utf-8'):
+    for char in word:
     	if prev_char == char:
     		continue
     	new_word = new_word + char
     	prev_char = char
     return new_word
 
+def process_tweet(tweet):
+	word_list = tweet.split()
+	sentence = ""
+	for word in word_list:
+		if word in stopwords:
+			continue
+		check = re.findall(r'(?:pic.twitter|^@|\d+)', word)
+		if check:
+			continue
+		word = remove_repeating_char(remove_punct_neg(remove_punct_pos(word)))
+		if len(word) <= 1:
+			continue
+		st_word = stemmer.stem(word)
+		sentence = sentence + " " + st_word
+	return sentence
+
 def create_train(text_raw, tag):
 	text_lines = text_raw.split("\n")
 
-	stemmer = TurkishStemmer()
-
-	stopwords = read_file("stopwords.txt").decode("utf-8").split("\n")
-
 	for line in text_lines:
 		line = line.lower()
-		tweet = line.split("\t")[3].encode("utf-8")
+		tweet = line.split("\t")[3]
 		delete_list = [","]
+		
 		tweet = delete_characters_space(tweet, delete_list)
-
+		
 		word_list = remove_words(tweet.split(), stopwords)
+		
 		word_list = remove_with_regex(word_list)
 
 		word_list = [ remove_repeating_char(remove_punct_neg(remove_punct_pos(word))) for word in word_list ]
@@ -90,16 +108,21 @@ def create_train(text_raw, tag):
 		
 		sentence = ""
 		for word in word_list:
-			st_word = stemmer.stem(word.encode("utf-8"))
+			st_word = stemmer.stem(word)
 			sentence = sentence + " " + st_word
+
+		#sentence = process_tweet(tweet)
 
 		tup = (sentence, tag)
 		train.append(tup)
 
+
+start = time.time()
+
 direct = "./Train/"
-positive_raw = read_file(os.path.join(direct, "positive-train")).decode("utf-8")
-negative_raw = read_file(os.path.join(direct, "negative-train")).decode("utf-8")
-notr_raw = read_file(os.path.join(direct, "notr-train")).decode("utf-8")
+positive_raw = read_file(os.path.join(direct, "positive-train"))
+negative_raw = read_file(os.path.join(direct, "negative-train"))
+notr_raw = read_file(os.path.join(direct, "notr-train"))
 
 train = []
 
@@ -110,6 +133,11 @@ create_train(notr_raw, "0")
 #all_words = set(word for passage in train for word in word_tokenize(passage[0]))
 #t = [({word: (word in word_tokenize(x[0])) for word in all_words}, x[1]) for x in train]
 #write_file("t", t)
+
+
+
+end = time.time()
+print(end - start)
 
 
 
