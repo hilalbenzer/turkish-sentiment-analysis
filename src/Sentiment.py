@@ -3,10 +3,11 @@
 
 import re, os
 import nltk
-from nltk.tokenize import word_tokenize
-import string
+#from nltk.tokenize import word_tokenize
+import string #punctuation
 from TurkishStemmer import TurkishStemmer
 import time
+import operator #for sorting dict
 
 def read_file(filename):
 	f = open(filename, "r") 
@@ -20,8 +21,16 @@ def write_file(filename, output):
 	file.write(str(output))
 	file.close()
 
+def add_to_freq_dict(dictionary, word):
+	if word not in dictionary:
+		freq = 1
+		dictionary[word] = freq
+	else:
+		dictionary[word] += 1
+
 stemmer = TurkishStemmer()
-stopwords = read_file("stopwords.txt").split("\n")
+stopwords = read_file("stopwords_new.txt").split("\n")
+#exclude = [".", ",", ":", ";", "?", "!", "\"", "#", "$", "%", "&", "\'", "\(", "\)", "\*", "+", "-", "\\", "/", "<", ">", "=", "@", "[", "]", "\^", "_", "`", "{", "}", "|", "~"]
 
 def delete_characters(text, char_list):
 	for char in char_list:
@@ -44,23 +53,31 @@ def remove_with_regex(word_list):
 			new_word_list.append(word)
 	return new_word_list
 
-def remove_punct_pos(word):
+def replace_emoticon(word):
+	check_pos = re.findall(r'(?::\)|:-\)|=\)|:D|:d|<3|\(:|:\'\)|\^\^|;\))', word)
+	check_neg = re.findall(r'(:-\(|:\(|;\(|;-\(|=\(|:/|:\\|-_-)', word)
+	if check_pos:
+		word = ":)"
+	elif check_neg:
+		word = ":("
+	return word
+
+def remove_punct(word):
     exclude = set(string.punctuation)
-    check = re.findall(r'(?::\)|:-\)|=\)|:D|:d|<3|\(:|:\'\)|\^\^|;\))', word)
-    if not check:
+    word = replace_emoticon(word)
+    if word != ":)" and word != ":(":
     	word = ''.join(ch for ch in word if ch not in exclude)
-    else:
-    	word = ":)"
     return word
 
-def remove_punct_neg(word):
-    exclude = set(string.punctuation)
-    check = re.findall(r'(:-\(|:\(|;\(|;-\(|=\(|:/|:\\|-_-)', word)
-    if not check:
-    	word = ''.join(ch for ch in word if ch not in exclude)
-    else:
-    	word = ":("
-    return word
+def replace_turkish_char(word):
+	#corr = {'ş':'s', 'ç':'c', 'ğ':'g', 'ü':'u', 'ö':'o', 'ı':'i'}
+	word = word.replace('ş','s')
+	word = word.replace('ç','c')
+	word = word.replace('ğ','g')
+	word = word.replace('ü','u')
+	word = word.replace('ö','o')
+	word = word.replace('ı','i')
+	return word
 
 def remove_repeating_char(word):
     new_word = ""
@@ -98,18 +115,22 @@ def create_train(text_raw, tag):
 		
 		tweet = delete_characters_space(tweet, delete_list)
 		
-		word_list = remove_words(tweet.split(), stopwords)
+		#word_list = remove_words(tweet.split(), stopwords)
+		word_list = tweet.split()
 		
 		word_list = remove_with_regex(word_list)
 
-		word_list = [ remove_repeating_char(remove_punct_neg(remove_punct_pos(word))) for word in word_list ]
+		word_list = [ stemmer.stem(replace_turkish_char(remove_punct(remove_repeating_char(word))))for word in word_list ]
 
 		word_list = [word for word in word_list if len(word) > 1]
+
+		word_list = remove_words(word_list, stopwords)
 		
 		sentence = ""
 		for word in word_list:
-			st_word = stemmer.stem(word)
-			sentence = sentence + " " + st_word
+			#st_word = stemmer.stem(word)
+			sentence = sentence + " " + word
+			add_to_freq_dict(dictionary, word)
 
 		#sentence = process_tweet(tweet)
 
@@ -128,22 +149,40 @@ notr_raw = read_file(os.path.join(direct, "notr-train"))
 
 print("Preprocessing...")
 train = []
+dictionary = {}
 create_train(positive_raw, "1")
 create_train(negative_raw, "-1")
 create_train(notr_raw, "0")
 
+
+#sorted_d = sorted(dictionary.items(), key=operator.itemgetter(1),reverse=True)
+#write_file("dictionary", sorted_d)
+
 print("This thing...")
-all_words = set(word for passage in train for word in word_tokenize(passage[0]))
 
 
 #training_set = nltk.classify.apply_features(extract_features, train)
-
 #classifier = nltk.NaiveBayesClassifier.train(training_set)
+
+#all_words = set(word for passage in train for word in word_tokenize(passage[0]))
 
 test_sentence = ["SKANDAL !! Boğaziçi ?nde PKK sloganları ve PKK'nın ne işi var? pic.twitter.com/aNE1FKR5BB", "Boğaziçi üni kapatılsın. Bence gereksiz Pkk yuvası", "Hayaller tamda istanbul bogaziçi universitesi", "Boğaziçi Üniversitesi - Tarih Bölümü kalpben <3", "Bugün Bogaziçi Üniversitesi Mithat Alam Film Merkezi'nde Hayko Cepkin'le söylesecegiz: pic.twitter.com/emNtHqGMQD 18.00 itibariyle baslariz.", "Boğaziçi Üniversitesi yds 2014 - Bildirimiz sunuluyor pic.twitter.com/W1i4wQrW3K"]
 
 for test in test_sentence:
 	print(test)
+	test = test.lower()
+	delete_list = [","]
+	tweet = delete_characters_space(test, delete_list)
+	word_list = tweet.split()
+	word_list = remove_with_regex(word_list)
+	word_list = [ stemmer.stem(replace_turkish_char(remove_punct(remove_repeating_char(word))))for word in word_list ]
+	word_list = [word for word in word_list if len(word) > 1]
+	word_list = remove_words(word_list, stopwords)
+		
+	sentence = ""
+	for word in word_list:
+		sentence = sentence + " " + word
+	print(sentence)
 	#print(classifier.classify(extract_features(test.split())))
 	print("\n")
 
