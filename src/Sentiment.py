@@ -3,7 +3,7 @@
 
 import re, os
 import nltk
-#from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize
 import string #punctuation
 from TurkishStemmer import TurkishStemmer
 import time
@@ -58,8 +58,10 @@ def replace_emoticon(word):
 	check_neg = re.findall(r'(:-\(|:\(|;\(|;-\(|=\(|:/|:\\|-_-)', word)
 	if check_pos:
 		word = ":)"
+		word = ""
 	elif check_neg:
 		word = ":("
+		word = ""
 	return word
 
 def remove_punct(word):
@@ -89,29 +91,13 @@ def remove_repeating_char(word):
     	prev_char = char
     return new_word
 
-def process_tweet(tweet):
-	word_list = tweet.split()
-	sentence = ""
-	for word in word_list:
-		if word in stopwords:
-			continue
-		check = re.findall(r'(?:pic.twitter|^@|\d+)', word)
-		if check:
-			continue
-		word = remove_repeating_char(remove_punct_neg(remove_punct_pos(word)))
-		if len(word) <= 1:
-			continue
-		st_word = stemmer.stem(word)
-		sentence = sentence + " " + st_word
-	return sentence
-
 def create_train(text_raw, tag):
 	text_lines = text_raw.split("\n")
 
 	for line in text_lines:
 		line = line.lower()
 		tweet = line.split("\t")[3]
-		delete_list = [","]
+		delete_list = [",", "’"]
 		
 		tweet = delete_characters_space(tweet, delete_list)
 		
@@ -160,11 +146,14 @@ create_train(notr_raw, "0")
 
 print("This thing...")
 
+all_words = set(word for passage in train for word in word_tokenize(passage[0]))
+t = [({word: (word in word_tokenize(x[0])) for word in all_words}, x[1]) for x in train]
+classifier = nltk.NaiveBayesClassifier.train(t)
 
 #training_set = nltk.classify.apply_features(extract_features, train)
 #classifier = nltk.NaiveBayesClassifier.train(training_set)
 
-#all_words = set(word for passage in train for word in word_tokenize(passage[0]))
+
 
 test_sentence = ["SKANDAL !! Boğaziçi ?nde PKK sloganları ve PKK'nın ne işi var? pic.twitter.com/aNE1FKR5BB", "Boğaziçi üni kapatılsın. Bence gereksiz Pkk yuvası", "Hayaller tamda istanbul bogaziçi universitesi", "Boğaziçi Üniversitesi - Tarih Bölümü kalpben <3", "Bugün Bogaziçi Üniversitesi Mithat Alam Film Merkezi'nde Hayko Cepkin'le söylesecegiz: pic.twitter.com/emNtHqGMQD 18.00 itibariyle baslariz.", "Boğaziçi Üniversitesi yds 2014 - Bildirimiz sunuluyor pic.twitter.com/W1i4wQrW3K"]
 
@@ -175,7 +164,7 @@ for test in test_sentence:
 	tweet = delete_characters_space(test, delete_list)
 	word_list = tweet.split()
 	word_list = remove_with_regex(word_list)
-	word_list = [ stemmer.stem(replace_turkish_char(remove_punct(remove_repeating_char(word))))for word in word_list ]
+	word_list = [ replace_turkish_char(stemmer.stem(remove_punct(remove_repeating_char(word))))for word in word_list ]
 	word_list = [word for word in word_list if len(word) > 1]
 	word_list = remove_words(word_list, stopwords)
 		
@@ -184,7 +173,11 @@ for test in test_sentence:
 		sentence = sentence + " " + word
 	print(sentence)
 	#print(classifier.classify(extract_features(test.split())))
+	test_sent_features = {word.lower(): (word in word_tokenize(sentence)) for word in all_words}
+	print(classifier.classify(test_sent_features))
 	print("\n")
+
+classifier.show_most_informative_features()
 
 end = time.time()
 print(end - start)
