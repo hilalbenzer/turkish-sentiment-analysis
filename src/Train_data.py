@@ -6,9 +6,11 @@ import operator #for sorting dict
 import pickle
 import Util
 from spell_correction import correction
+from pathlib import Path
 
 stemmer = TurkishStemmer()
-stopwords = Util.read_file("./stopwords_new.txt").split("\n")
+src_folder = Path("./")
+stopwords = Util.read_file(Path(src_folder / "stopwords_new.txt")).split("\n")
 #exclude = [".", ",", ":", ";", "?", "!", "\"", "#", "$", "%", "&", "\'", "\(", "\)", "\*", "+", "-", "\\", "/", "<", ">", "=", "@", "[", "]", "\^", "_", "`", "{", "}", "|", "~"]
 
 def preprocess(text):
@@ -39,7 +41,7 @@ def create_train(text_raw, tag):
 
 start = time.time()
 
-direct = "./Train100/"
+direct = src_folder / "Train100" 
 
 print("Reading files...")
 positive_raw = Util.read_file(os.path.join(direct, "positive-train"))

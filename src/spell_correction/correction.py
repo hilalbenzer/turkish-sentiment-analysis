@@ -1,11 +1,13 @@
-import re
+import re, os
 from collections import Counter
-import os
+from pathlib import Path
 
 WORDS = dict()
 
+spell_folder = Path("./spell_correction")
+
 def words(text): return re.findall(r'\w+', text.lower())
-with open(os.path.expanduser("./spell_correction/big2.txt"), "r", encoding = 'utf-8') as f:
+with open(os.path.expanduser(Path(spell_folder / "big2.txt")), "r", encoding = 'utf-8') as f:
     for line in f:
         splitted = line.split()
         WORDS[splitted[0]] = int(splitted[1])
