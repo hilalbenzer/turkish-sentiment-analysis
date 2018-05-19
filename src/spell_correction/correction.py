@@ -1,9 +1,11 @@
 import re
 from collections import Counter
+import os
 
 WORDS = dict()
+
 def words(text): return re.findall(r'\w+', text.lower())
-with open("source\\big2.txt", "r", encoding = 'utf-8') as f:
+with open(os.path.expanduser("./spell_correction/big2.txt"), "r", encoding = 'utf-8') as f:
     for line in f:
         splitted = line.split()
         WORDS[splitted[0]] = int(splitted[1])
@@ -47,5 +49,4 @@ def edits2(word):
 def print_diff(word, s):
     if not word == s:
         print(word + " --> " + s)
-print(correction('hayaler'))
 counter = 0
