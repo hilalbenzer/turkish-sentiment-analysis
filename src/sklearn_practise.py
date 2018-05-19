@@ -206,13 +206,17 @@ for x, y in train:
 
 categories = ['neg', 'notr', 'pos']
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import SGDClassifier
+
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 
 from sklearn.pipeline import Pipeline
 text_clf = Pipeline([('vect', CountVectorizer()),
                      ('tfidf', TfidfTransformer()),
-                     ('clf', MultinomialNB()),
+                     ('clf', SGDClassifier(loss='hinge', penalty='l2',
+                                           alpha=1e-3, random_state=42,
+                                           max_iter=5, tol=None)),
 ])
 text_clf.fit(data, labels)
 
@@ -223,6 +227,8 @@ print(np.mean(predicted == labels))
 from sklearn import metrics
 print(metrics.classification_report(labels, predicted,
      target_names=categories))
+
+print(metrics.confusion_matrix(labels, predicted))     
 
 end = time.time()
 print(end - start)
