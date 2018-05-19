@@ -12,12 +12,24 @@ stemmer = TurkishStemmer()
 src_folder = Path("./")
 stopwords = Util.read_file(Path(src_folder / "stopwords_new.txt")).split("\n")
 #exclude = [".", ",", ":", ";", "?", "!", "\"", "#", "$", "%", "&", "\'", "\(", "\)", "\*", "+", "-", "\\", "/", "<", ">", "=", "@", "[", "]", "\^", "_", "`", "{", "}", "|", "~"]
+def open_pickle(filename):
+    infile = open(filename,'rb')
+    opened_pickle = pickle.load(infile)
+    infile.close()
+    return opened_pickle
+
+dict_stemmer = open_pickle("stemmer")
+def stem_word(word):
+	if word in dict_stemmer.keys():
+		return dict_stemmer[word]
+	else:
+		return word
 
 def preprocess(text):
 	delete_list = [",", "’"]
 	tweet = Util.delete_characters_space(text, delete_list)
 	word_list = tweet.split()
-	word_list = [ Util.replace_turkish_char(stemmer.stem(correction.correction(Util.remove_punct(Util.remove_with_regex(word))))) for word in word_list ]
+	word_list = [ Util.replace_turkish_char(stem_word(correction.correction(Util.remove_punct(Util.remove_with_regex(word))))) for word in word_list ]
 	word_list = [word for word in word_list if len(word) > 1]
 	word_list = Util.remove_words(word_list, stopwords)
 
@@ -41,7 +53,7 @@ def create_train(text_raw, tag):
 
 start = time.time()
 
-direct = src_folder / "Train" 
+direct = src_folder / "Train100"
 
 print("Reading files...")
 positive_raw = Util.read_file(os.path.join(direct, "positive-train"))
