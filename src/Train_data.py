@@ -53,7 +53,7 @@ def create_train(text_raw, tag):
 
 start = time.time()
 
-direct = src_folder / "Train100"
+direct = src_folder / "Train"
 
 print("Reading files...")
 positive_raw = Util.read_file(os.path.join(direct, "positive-train"))
