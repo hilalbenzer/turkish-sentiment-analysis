@@ -40,12 +40,16 @@ def create_train(text_raw, tag):
 
 start = time.time()
 
+<<<<<<< HEAD
 direct = src_folder / "TrainFirstHalf"
 print("TRAIN")
 print("Reading files...")
 positive_raw = Util.read_file(os.path.join(direct, "positive-train"))
 negative_raw = Util.read_file(os.path.join(direct, "negative-train"))
 notr_raw = Util.read_file(os.path.join(direct, "notr-train"))
+=======
+direct = src_folder / "Train"
+>>>>>>> 9d584a9fd96c88e49e7028e6dad628ea8d0b2b03
 
 print("Preprocessing...")
 train = []
