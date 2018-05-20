@@ -89,8 +89,6 @@ create_train(negative_raw, 0)
 create_train(notr_raw, 1)
 create_train(positive_raw, 2)
 
-#Util.write_file("dictionary", dictionary)
-
 for x, y in train:
     data.append(x)
     labels.append(y)
