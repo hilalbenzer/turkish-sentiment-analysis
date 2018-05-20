@@ -50,19 +50,20 @@ labels = Util.open_pickle("labelsTest")
 predicted = text_clf.predict(docs_test)
 print(np.mean(predicted == labels))
 
-
 print(metrics.classification_report(labels, predicted,
      target_names=categories))
 
 print(metrics.confusion_matrix(labels, predicted))
 
+docs_test = Util.read_file("test_tweets").split("\n")
+docs_test_processed = [preprocess(sen.lower()) for sen in docs_test ]
+predicted = text_clf.predict(docs_test_processed)
 
-docs_test = ["Boğaziçi çok güzel bir yer", "Lanet olsun böyle okula", "Okulda poster sunumu yapılacaktır"]
-docs_test = [preprocess(sen) for sen in docs_test ]
-predicted = text_clf.predict(docs_test)
-
+count = 0
 for p in predicted:
-    print("predicted " + categories[p])
+	print("Sentence: " + docs_test[count])
+	print("Predicted: " + categories[p])
+	count += 1
 
 end = time.time()
 print("Elapsed time: " + str(end - start))

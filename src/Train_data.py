@@ -1,13 +1,11 @@
 import re, os
 import numpy as np
-from TurkishStemmer import TurkishStemmer
 import time
 import pickle
 import Util
 from spell_correction import correction
 from pathlib import Path
 
-stemmer = TurkishStemmer()
 src_folder = Path("./")
 stopwords = Util.read_file(Path(src_folder / "stopwords.txt")).split("\n")
 #exclude = [".", ",", ":", ";", "?", "!", "\"", "#", "$", "%", "&", "\'", "\(", "\)", "\*", "+", "-", "\\", "/", "<", ">", "=", "@", "[", "]", "\^", "_", "`", "{", "}", "|", "~"]
