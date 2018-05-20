@@ -1,13 +1,11 @@
-import re, os
-import numpy as np
-import time
-import pickle
+import re, os, time, pickle
 import Util
 from spell_correction import correction
 from pathlib import Path
 
 src_folder = Path("./")
-stopwords = Util.read_file(Path(src_folder / "stopwords.txt")).split("\n")
+stopwords = Util.read_file(Path(src_folder / "stopwords")).split("\n")
+#stopwords = []
 #exclude = [".", ",", ":", ";", "?", "!", "\"", "#", "$", "%", "&", "\'", "\(", "\)", "\*", "+", "-", "\\", "/", "<", ">", "=", "@", "[", "]", "\^", "_", "`", "{", "}", "|", "~"]
 
 def preprocess(text):
@@ -38,8 +36,8 @@ def create_train(text_raw, tag):
 
 start = time.time()
 
-direct = src_folder / "TrainFirstHalf"
-print("TRAIN")
+direct = src_folder / "Train"
+
 print("Reading files...")
 positive_raw = Util.read_file(os.path.join(direct, "positive-train"))
 negative_raw = Util.read_file(os.path.join(direct, "negative-train"))
@@ -67,38 +65,8 @@ def create_pickle(filename, output):
     pickle.dump(output, outfile)
     outfile.close()
 
-create_pickle("dataTrain", data)
-create_pickle("labelsTrain", labels)
-
-direct = src_folder / "TrainSecondHalf"
-print("\nTEST")
-print("Reading files...")
-positive_raw = Util.read_file(os.path.join(direct, "positive-train"))
-negative_raw = Util.read_file(os.path.join(direct, "negative-train"))
-notr_raw = Util.read_file(os.path.join(direct, "notr-train"))
-
-print("Preprocessing...")
-train = []
-data = []
-labels = []
-
-dictionary = {}
-create_train(negative_raw, 0)
-create_train(notr_raw, 1)
-create_train(positive_raw, 2)
-
-for x, y in train:
-    data.append(x)
-    labels.append(y)
-
-print("Creating pickle files...")
-def create_pickle(filename, output):
-    outfile = open(filename, 'wb')
-    pickle.dump(output, outfile)
-    outfile.close()
-
-create_pickle("dataTest", data)
-create_pickle("labelsTest", labels)
+create_pickle("data", data)
+create_pickle("labels", labels)
 
 end = time.time()
-print("Elapsed time: " + str(end - start))
+print("Elapsed time: " + str(end - start) + " seconds")

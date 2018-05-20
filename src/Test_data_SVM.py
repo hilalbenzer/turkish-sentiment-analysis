@@ -1,22 +1,24 @@
-import numpy as np
 import time
 import Util
-from sklearn.naive_bayes import MultinomialNB
-from sklearn.linear_model import SGDClassifier
 
+def warn(*args, **kwargs):
+    pass
+import warnings
+warnings.warn = warn
+
+from sklearn.linear_model import SGDClassifier
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
-
 from sklearn.pipeline import Pipeline
-
 from sklearn import metrics
 
 from pathlib import Path
-
+import numpy as np
 from spell_correction import correction
 
 src_folder = Path("./")
-stopwords = Util.read_file(Path(src_folder / "stopwords.txt")).split("\n")
+stopwords = Util.read_file(Path(src_folder / "stopwords")).split("\n")
+#stopwords = []
 
 def preprocess(text):
 	delete_list = [",", "’"]
@@ -32,38 +34,42 @@ def preprocess(text):
 	return(sentence)
 
 start = time.time()
-data = Util.open_pickle("dataTrain")
-labels = Util.open_pickle("labelsTrain")
 
-categories = ['neg', 'notr', 'pos']
+data = Util.open_pickle("data")
+labels = Util.open_pickle("labels")
+
+categories = ['-1', '0', '1']
 
 text_clf = Pipeline([('vect', CountVectorizer()),
                      ('tfidf', TfidfTransformer()),
-                     ('clf', MultinomialNB()),
+                     ('clf', SGDClassifier(loss='hinge', penalty='l2',
+                                           alpha=1e-3, random_state=42,
+                                           max_iter=5, tol=None)),
 ])
+
 text_clf.fit(data, labels)
-
-docs_test = Util.open_pickle("dataTest")
-labels = Util.open_pickle("labelsTest")
-#docs_test = data
-#docs_test = [preprocess(sen) for sen in docs_test ]
-predicted = text_clf.predict(docs_test)
-print(np.mean(predicted == labels))
-
-print(metrics.classification_report(labels, predicted,
-     target_names=categories))
-
-print(metrics.confusion_matrix(labels, predicted))
 
 docs_test = Util.read_file("test_tweets").split("\n")
 docs_test_processed = [preprocess(sen.lower()) for sen in docs_test ]
 predicted = text_clf.predict(docs_test_processed)
 
+actual = [1, -1, 0, -1, -1, 1, -1, 1, 1, 0, 0, -1, 0, -1, 1, -1, -1, 0, 1, 0, -1, -1, -1, 0, 1]
+right = 0
+
 count = 0
 for p in predicted:
-	print("Sentence: " + docs_test[count])
-	print("Predicted: " + categories[p])
+	#print("Sentence: " + docs_test[count])
+	#print("Processed sentence: " + docs_test_processed[count])
+	#print("Predicted: " + categories[p] + "\n")
+	if actual[count] == int(categories[p]):
+		right += 1
 	count += 1
 
+print(np.mean(predicted == actual))
+print(metrics.classification_report(actual, predicted, target_names=categories))
+print(metrics.confusion_matrix(actual, predicted))
+
+print("Accuracy: " + str((float(right)/len(actual)) * 100))
+
 end = time.time()
-print("Elapsed time: " + str(end - start))
+print("Elapsed time: " + str(end - start) + " seconds")
