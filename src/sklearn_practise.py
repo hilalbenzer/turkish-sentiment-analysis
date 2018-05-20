@@ -46,7 +46,7 @@ text_clf.fit(data, labels)
 docs_test = Util.open_pickle("dataTest")
 labels = Util.open_pickle("labelsTest")
 #docs_test = data
-docs_test = [preprocess(sen) for sen in docs_test ]
+#docs_test = [preprocess(sen) for sen in docs_test ]
 predicted = text_clf.predict(docs_test)
 print(np.mean(predicted == labels))
 
