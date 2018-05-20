@@ -1,4 +1,4 @@
-import re
+import re, pickle
 import string #punctuation
 
 def read_file(filename):
@@ -12,6 +12,19 @@ def write_file(filename, output):
 	file = open(full_filename, 'w', encoding = "utf-8")
 	file.write(str(output))
 	file.close()
+
+def open_pickle(filename):
+    infile = open(filename,'rb')
+    opened_pickle = pickle.load(infile)
+    infile.close()
+    return opened_pickle
+
+dict_stemmer = open_pickle("stemmer")
+def stem_word(word):
+	if word in dict_stemmer.keys():
+		return dict_stemmer[word]
+	else:
+		return word
 
 def add_to_freq_dict(dictionary, word):
 	if word not in dictionary:
@@ -48,8 +61,8 @@ def remove_decimal(word):
 	return new_word_list
 
 def replace_emoticon(word):
-	check_pos = re.findall(r'(?::\)|:-\)|=\)|:D|:d|<3|\(:|:\'\)|\^\^|;\))', word)
-	check_neg = re.findall(r'(:-\(|:\(|;\(|;-\(|=\(|:/|:\\|-_-)', word)
+	check_pos = re.findall(r'(?::\)|:-\)|=\)|:D|:d|<3|\(:|:\'\)|\^\^|;\)|\(-:)', word)
+	check_neg = re.findall(r'(:-\(|:\(|;\(|;-\(|=\(|:/|:\\|-_-|\):|\)-:)', word)
 	if check_pos:
 		#word = ":)"
 		word = "SMILEYPOSITIVE"

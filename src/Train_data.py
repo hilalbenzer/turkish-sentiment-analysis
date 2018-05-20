@@ -2,7 +2,6 @@ import re, os
 import numpy as np
 from TurkishStemmer import TurkishStemmer
 import time
-import operator #for sorting dict
 import pickle
 import Util
 from spell_correction import correction
@@ -10,26 +9,14 @@ from pathlib import Path
 
 stemmer = TurkishStemmer()
 src_folder = Path("./")
-stopwords = Util.read_file(Path(src_folder / "stopwords_new.txt")).split("\n")
+stopwords = Util.read_file(Path(src_folder / "stopwords.txt")).split("\n")
 #exclude = [".", ",", ":", ";", "?", "!", "\"", "#", "$", "%", "&", "\'", "\(", "\)", "\*", "+", "-", "\\", "/", "<", ">", "=", "@", "[", "]", "\^", "_", "`", "{", "}", "|", "~"]
-def open_pickle(filename):
-    infile = open(filename,'rb')
-    opened_pickle = pickle.load(infile)
-    infile.close()
-    return opened_pickle
-
-dict_stemmer = open_pickle("stemmer")
-def stem_word(word):
-	if word in dict_stemmer.keys():
-		return dict_stemmer[word]
-	else:
-		return word
 
 def preprocess(text):
 	delete_list = [",", "’"]
 	tweet = Util.delete_characters_space(text, delete_list)
 	word_list = tweet.split()
-	word_list = [ Util.replace_turkish_char(stem_word(correction.correction(Util.remove_punct(Util.remove_with_regex(word))))) for word in word_list ]
+	word_list = [ Util.stem_word(correction.correction(Util.remove_punct(Util.remove_repeating_char(Util.remove_with_regex(word))))) for word in word_list ]
 	word_list = [word for word in word_list if len(word) > 1]
 	word_list = Util.remove_words(word_list, stopwords)
 
@@ -53,8 +40,8 @@ def create_train(text_raw, tag):
 
 start = time.time()
 
-direct = src_folder / "Train100"
-
+direct = src_folder / "TrainFirstHalf"
+print("TRAIN")
 print("Reading files...")
 positive_raw = Util.read_file(os.path.join(direct, "positive-train"))
 negative_raw = Util.read_file(os.path.join(direct, "negative-train"))
@@ -70,18 +57,52 @@ create_train(negative_raw, 0)
 create_train(notr_raw, 1)
 create_train(positive_raw, 2)
 
+#Util.write_file("dictionary", dictionary)
+
 for x, y in train:
     data.append(x)
     labels.append(y)
 
 print("Creating pickle files...")
 def create_pickle(filename, output):
-    outfile = open(filename,'wb')
-    pickle.dump(output,outfile)
+    outfile = open(filename, 'wb')
+    pickle.dump(output, outfile)
     outfile.close()
 
-create_pickle("data", data)
-create_pickle("labels", labels)
+create_pickle("dataTrain", data)
+create_pickle("labelsTrain", labels)
+
+direct = src_folder / "TrainSecondHalf"
+print("\nTEST")
+print("Reading files...")
+positive_raw = Util.read_file(os.path.join(direct, "positive-train"))
+negative_raw = Util.read_file(os.path.join(direct, "negative-train"))
+notr_raw = Util.read_file(os.path.join(direct, "notr-train"))
+
+print("Preprocessing...")
+train = []
+data = []
+labels = []
+
+dictionary = {}
+create_train(negative_raw, 0)
+create_train(notr_raw, 1)
+create_train(positive_raw, 2)
+
+#Util.write_file("dictionary", dictionary)
+
+for x, y in train:
+    data.append(x)
+    labels.append(y)
+
+print("Creating pickle files...")
+def create_pickle(filename, output):
+    outfile = open(filename, 'wb')
+    pickle.dump(output, outfile)
+    outfile.close()
+
+create_pickle("dataTest", data)
+create_pickle("labelsTest", labels)
 
 end = time.time()
 print("Elapsed time: " + str(end - start))
