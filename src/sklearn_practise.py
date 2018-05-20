@@ -44,17 +44,18 @@ text_clf = Pipeline([('vect', CountVectorizer()),
 text_clf.fit(data, labels)
 
 docs_test = Util.open_pickle("dataTest")
-
+labels = Util.open_pickle("labelsTest")
 #docs_test = data
+docs_test = [preprocess(sen) for sen in docs_test ]
 predicted = text_clf.predict(docs_test)
 print(np.mean(predicted == labels))
 
-"""
+
 print(metrics.classification_report(labels, predicted,
      target_names=categories))
 
 print(metrics.confusion_matrix(labels, predicted))
-"""
+
 
 docs_test = ["Boğaziçi çok güzel bir yer", "Lanet olsun böyle okula", "Okulda poster sunumu yapılacaktır"]
 docs_test = [preprocess(sen) for sen in docs_test ]
