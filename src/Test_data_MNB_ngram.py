@@ -40,7 +40,7 @@ labels = Util.open_pickle("labels")
 
 categories = ['-1', '0', '1']
 
-text_clf = Pipeline([('vect', CountVectorizer(ngram_range=(1, 4),
+text_clf = Pipeline([('vect', CountVectorizer(ngram_range=(1, 2),
                                     token_pattern=r'\b\w+\b', min_df=1)),
                      ('tfidf', TfidfTransformer()),
                      ('clf', MultinomialNB()),
