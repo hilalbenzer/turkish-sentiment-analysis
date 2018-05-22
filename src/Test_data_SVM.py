@@ -1,4 +1,4 @@
-import time
+import time, sys
 import Util
 
 def warn(*args, **kwargs):
@@ -17,8 +17,8 @@ import numpy as np
 from spell_correction import correction
 
 src_folder = Path("./")
-stopwords = Util.read_file(Path(src_folder / "stopwords")).split("\n")
-#stopwords = []
+#stopwords = Util.read_file(Path(src_folder / "stopwords")).split("\n")
+stopwords = []
 
 def preprocess(text):
 	delete_list = [",", "’"]
@@ -40,36 +40,57 @@ labels = Util.open_pickle("labels")
 
 categories = ['-1', '0', '1']
 
-text_clf = Pipeline([('vect', CountVectorizer()),
+text_clf = ""
+
+if len(sys.argv) == 2:
+	if sys.argv[1] == "bigram":
+		text_clf = Pipeline([('vect', CountVectorizer(ngram_range=(1, 2),
+                      token_pattern=r'\b\w+\b', min_df=1)),
                      ('tfidf', TfidfTransformer()),
                      ('clf', SGDClassifier(loss='hinge', penalty='l2',
                                            alpha=1e-3, random_state=42,
                                            max_iter=5, tol=None)),
-])
+		])
+	else:
+		print("Usage: python3 Test_data_SVM.py")
+		print("Usage (bigram): python3 Test_data_SVM.py bigram")
+		sys.exit()
+elif len(sys.argv) == 1:
+	text_clf = Pipeline([('vect', CountVectorizer()),
+                     ('tfidf', TfidfTransformer()),
+                     ('clf', SGDClassifier(loss='hinge', penalty='l2',
+                                           alpha=1e-3, random_state=42,
+                                           max_iter=5, tol=None)),
+	])
+else:
+	print("Usage: python3 Test_data_SVM.py")
+	print("Usage (bigram): python3 Test_data_SVM.py bigram")
+	sys.exit()
 
 text_clf.fit(data, labels)
 
-docs_test = Util.read_file("test_tweets").split("\n")
+docs_test = Util.read_file("tests").split("\n")
 docs_test_processed = [preprocess(sen.lower()) for sen in docs_test ]
 predicted = text_clf.predict(docs_test_processed)
 
-actual = [1, -1, 0, -1, -1, 1, -1, 1, 1, 0, 0, -1, 0, -1, 1, -1, -1, 0, 1, 0, -1, -1, -1, 0, 1]
-right = 0
+#actual = Util.read_file("tests_values").split("\n")
+#right = 0
 
-count = 0
+#count = 0
 for p in predicted:
 	#print("Sentence: " + docs_test[count])
 	#print("Processed sentence: " + docs_test_processed[count])
 	#print("Predicted: " + categories[p] + "\n")
-	if actual[count] == int(categories[p]):
-		right += 1
-	count += 1
+	print(categories[p])
+	#if int(actual[count]) == int(categories[p]):
+	#	right += 1
+	#count += 1
 
-print(np.mean(predicted == actual))
-print(metrics.classification_report(actual, predicted, target_names=categories))
-print(metrics.confusion_matrix(actual, predicted))
+#print(np.mean(predicted == actual))
+#print(metrics.classification_report(actual, predicted, target_names=categories))
+#print(metrics.confusion_matrix(actual, predicted))
 
-print("Accuracy: " + str((float(right)/len(actual)) * 100))
+#print("Accuracy: " + str((float(right)/len(actual)) * 100))
 
 end = time.time()
-print("Elapsed time: " + str(end - start) + " seconds")
+#print("Elapsed time: " + str(end - start) + " seconds")
