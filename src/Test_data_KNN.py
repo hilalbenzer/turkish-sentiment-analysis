@@ -71,10 +71,10 @@ docs_test = Util.read_file("tests").split("\n")
 docs_test_processed = [preprocess(sen.lower()) for sen in docs_test ]
 predicted = text_clf.predict(docs_test_processed)
 
-actual = Util.read_file("tests_values").split("\n")
-right = 0
+#actual = Util.read_file("tests_values").split("\n")
+#right = 0
 
-count = 0
+#count = 0
 for p in predicted:
 	#print("Sentence: " + docs_test[count])
 	#print("Processed sentence: " + docs_test_processed[count])
