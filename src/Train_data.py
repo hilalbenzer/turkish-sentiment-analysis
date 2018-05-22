@@ -4,8 +4,8 @@ from spell_correction import correction
 from pathlib import Path
 
 src_folder = Path("./")
-stopwords = Util.read_file(Path(src_folder / "stopwords")).split("\n")
-#stopwords = []
+#stopwords = Util.read_file(Path(src_folder / "stopwords")).split("\n")
+stopwords = []
 #exclude = [".", ",", ":", ";", "?", "!", "\"", "#", "$", "%", "&", "\'", "\(", "\)", "\*", "+", "-", "\\", "/", "<", ">", "=", "@", "[", "]", "\^", "_", "`", "{", "}", "|", "~"]
 
 def preprocess(text):
@@ -36,7 +36,7 @@ def create_train(text_raw, tag):
 
 start = time.time()
 
-direct = src_folder / "Train"
+direct = src_folder / "TrainFirstHalf"
 
 print("Reading files...")
 positive_raw = Util.read_file(os.path.join(direct, "positive-train"))
