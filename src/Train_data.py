@@ -8,6 +8,9 @@ src_folder = Path("./")
 stopwords = []
 #exclude = [".", ",", ":", ";", "?", "!", "\"", "#", "$", "%", "&", "\'", "\(", "\)", "\*", "+", "-", "\\", "/", "<", ">", "=", "@", "[", "]", "\^", "_", "`", "{", "}", "|", "~"]
 
+"""
+Preprocessing for training data
+"""
 def preprocess(text):
 	delete_list = [",", "’"]
 	tweet = Util.delete_characters_space(text, delete_list)
@@ -22,7 +25,9 @@ def preprocess(text):
 		Util.add_to_freq_dict(dictionary, word)
 
 	return(sentence)
-
+"""
+Creates tuples as (sentence, tag) and returns the list of the tuples
+"""
 def create_train(text_raw, tag):
 	text_lines = text_raw.split("\n")
 
@@ -58,7 +63,9 @@ create_train(positive_raw, 2)
 for x, y in train:
     data.append(x)
     labels.append(y)
-
+"""
+Create pickle files of training data and its labels
+"""
 print("Creating pickle files...")
 def create_pickle(filename, output):
     outfile = open(filename, 'wb')

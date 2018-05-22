@@ -1,3 +1,6 @@
+"""
+Classify the testing data with SGDClassifier for SVM
+"""
 import time, sys
 import Util
 

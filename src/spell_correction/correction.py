@@ -1,3 +1,8 @@
+"""
+Spell correction for Turkish words
+Taken from:
+    https://norvig.com/spell-correct.html
+"""
 import re, os
 from collections import Counter
 from pathlib import Path

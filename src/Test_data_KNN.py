@@ -1,3 +1,7 @@
+"""
+Classify the testing data with KNeighborsClassifier
+pass the neihgbour parameter as command line argument
+"""
 import time, sys
 import Util
 

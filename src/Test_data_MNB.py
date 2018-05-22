@@ -1,3 +1,6 @@
+"""
+Classify the testing data with Multinomial Naive Bayes Classifier
+"""
 import time, sys
 import Util
 
