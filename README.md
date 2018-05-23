@@ -1,12 +1,28 @@
 # Turkish Sentiment Analysis for Twitter
 
-## **Required libraries / packages:**  <br>
+### **Preprocessing** <br>
+  • Case folding  <br>
+  • Tokenization <br>
+  • Removing repeating characters <br>
+  • Replacing emoticons <br>
+  • Removing punctuation <br>
+  • Spelling correction <br>
+  • Stemming <br>
+  • Stopword removal <br>
+  
+### **Classification** <br>
+  • Multinomial Naive Bayes (With and without 2grams) <br>
+  • Support Vector Machine (With and without 2grams) <br>
+  • K-Nearest Neighbors (With and without 2grams) <br>
+
+## **Requirements**
+
+### **Required libraries / packages:**  <br>
   • Python 3  <br>
   • Numpy for Python 3  <br>
   • scikit-learn for Python 3 <br>
 
 Train documents in [src/Train directory](https://github.com/hilalbenzer/BOUNSentimentAnalysis/tree/master/src/Train).
-
 Test documents in test_tweets
 
 ## **Usage**
