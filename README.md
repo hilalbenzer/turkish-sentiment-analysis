@@ -27,7 +27,7 @@ Test documents in test_tweets
 
 ## **Usage**
 1. Pull the repository
-2. ``` $ cd BOUNSentimentAnalysis/src ```
+2. ``` $ cd turkish-sentiment-analysis/src ```
 3. To train ``` $ python3 Train_data.py ```
 4. To test using Bag of Words:  <br>
   • Multinomial Naive Bayes: ``` $ python3 Test_data_MNB.py  ``` <br> 
